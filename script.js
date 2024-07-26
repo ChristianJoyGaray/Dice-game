@@ -14,8 +14,8 @@ let diceValuesArr = [];
 let isModalShowing = false;
 let score = 0;
 let total = 0;
-let round = 1;
-let rolls = 0;
+let round = 1; 
+let rolls = 0; 
 
 const rollDice = () => {
   diceValuesArr = [];
@@ -86,19 +86,38 @@ const getHighestDuplicates = (arr) => {
 
 const detectFullHouse = (arr) => {
   const counts = {};
-
   for (const num of arr) {
-    counts[num] = counts[num] ? counts[num] + 1 : 1;
+    counts[num] = (counts[num] || 0) + 1;
   }
 
-  const hasThreeOfAKind = Object.values(counts).includes(3);
-  const hasPair = Object.values(counts).includes(2);
-
-  if (hasThreeOfAKind && hasPair) {
-    updateRadioOption(2, 25);
+  const values = Object.values(counts);
+  if (values.includes(3) && values.includes(2)) {
+    updateRadioOption(2, 25); // Full House is worth 25 points
+  } else {
+    updateRadioOption(5, 0); // If not, update the last radio button with 0 points
   }
+};
 
-  updateRadioOption(5, 0);
+const checkForStraights = (arr) => {
+  const sortedArr = [...new Set(arr)].sort((a, b) => a - b);
+
+  const isSmallStraight = 
+    (sortedArr.includes(1) && sortedArr.includes(2) && sortedArr.includes(3) && sortedArr.includes(4)) ||
+    (sortedArr.includes(2) && sortedArr.includes(3) && sortedArr.includes(4) && sortedArr.includes(5)) ||
+    (sortedArr.includes(3) && sortedArr.includes(4) && sortedArr.includes(5) && sortedArr.includes(6));
+
+  const isLargeStraight = 
+    (sortedArr.includes(1) && sortedArr.includes(2) && sortedArr.includes(3) && sortedArr.includes(4) && sortedArr.includes(5)) ||
+    (sortedArr.includes(2) && sortedArr.includes(3) && sortedArr.includes(4) && sortedArr.includes(5) && sortedArr.includes(6));
+
+  if (isLargeStraight) {
+    updateRadioOption(4, 40); // Large Straight is worth 40 points
+    updateRadioOption(3, 30); // Also update the fourth radio button with 30 points
+  } else if (isSmallStraight) {
+    updateRadioOption(3, 30); // Small Straight is worth 30 points
+  } else {
+    updateRadioOption(5, 0); // If not, update the last radio button with 0 points
+  }
 };
 
 const resetRadioOptions = () => {
@@ -131,8 +150,6 @@ const resetGame = () => {
   resetRadioOptions();
 };
 
-
-
 rollDiceBtn.addEventListener("click", () => {
   if (rolls === 3) {
     alert("You have made three rolls this round. Please select a score.");
@@ -143,7 +160,7 @@ rollDiceBtn.addEventListener("click", () => {
     updateStats();
     getHighestDuplicates(diceValuesArr);
     detectFullHouse(diceValuesArr);
-
+    checkForStraights(diceValuesArr); // Call checkForStraights when the dice are rolled
   }
 });
 
@@ -184,6 +201,6 @@ keepScoreBtn.addEventListener("click", () => {
       }, 500);
     }
   } else {
-    alert("Please select an option or roll the dice");
+    alert("Please select an option or roll the dice.");
   }
 });
